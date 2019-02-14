@@ -309,7 +309,12 @@ module Parser = struct
     many (char ',' *> parameter) >>= fun parameters ->
     peek_char >>= function
     | None ->
-        return { time; uid; host; parameters; info = Info [ NEW ] }
+        (* XXX(dinosaure): [NEW] is a post-process. So if a message did not have
+           any flags, it is not necessary a [NEW] message but could be, it's
+           depends on where message is located (eg. [new] or [cur] folder).
+
+           See where we call [with_new]. *)
+        return { time; uid; host; parameters; info = Info [] }
     | Some ':' ->
         (char ':' *> peek_char >>= function
           (* TODO: | Some '1' -> _ *)

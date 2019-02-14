@@ -1,8 +1,19 @@
 (executable
  (name test_mem)
+ (modules test_mem)
  (libraries maildir maildir.mem alcotest))
+
+(executable
+ (name test_unix)
+ (modules test_unix)
+ (libraries maildir maildir.unix alcotest bos))
 
 (alias
  (name runtest)
  (deps (:test_mem test_mem.exe))
  (action (run %{test_mem} --color=always)))
+
+(alias
+ (name runtest)
+ (deps (:test_unix test_unix.exe))
+ (action (run %{test_unix} --color=always)))
