@@ -291,9 +291,6 @@ let () =
   @@ fun message ->
   let str = Maildir.to_filename message in
 
-  Fmt.pr "> result: @[<hov>%a@].\n%!" pp str ;
-  Fmt.pr "> for: @[<hov>%a@].\n%!" pp_message message ;
-
   match Maildir.of_filename str with
   | Ok res ->
       check_eq ~pp:Fmt.(Dump.list (pair string string)) ~eq:Maildir.equal_parameters message.Maildir.parameters res.Maildir.parameters ;
