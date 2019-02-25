@@ -13,7 +13,9 @@ Maildir implementation in OCaml for different backends (unix & memory)
 """
 
 build: [
+  ["dune" "subst"]
   ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 
 depends: [
@@ -26,4 +28,5 @@ depends: [
   "bos"
   "logs"
   "alcotest" {with-test}
+  "crowbar" {with-test}
 ]
