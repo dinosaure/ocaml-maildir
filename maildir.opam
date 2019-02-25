@@ -18,6 +18,10 @@ build: [
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 
+pin-depends: [
+  [ "crowbar.dev" "git+https://github.com/stedolan/crowbar.git" ]
+]
+
 depends: [
   "ocaml" {>= "4.03.0"}
   "dune" {build}
@@ -28,5 +32,5 @@ depends: [
   "bos"
   "logs"
   "alcotest" {with-test}
-  "crowbar" {with-test}
+  "crowbar" {>= "dev" & with-test}
 ]
