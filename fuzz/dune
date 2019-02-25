@@ -1,3 +1,8 @@
 (executable
  (name fuzz)
  (libraries crowbar maildir))
+
+(alias
+ (name runtest)
+ (deps (:fuzz fuzz.exe))
+ (action (run %{fuzz})))
