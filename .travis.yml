@@ -1,0 +1,16 @@
+language: c
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-docker.sh
+script: bash -ex .travis-docker.sh
+services:
+- docker
+env:
+  global:
+  - PINS="maildir:."
+  - DISTRO="debian-stable"
+  - TESTS=true
+  matrix:
+  - PACKAGE="maildir" OCAML_VERSION="4.03.0"
+  - PACKAGE="maildir" OCAML_VERSION="4.04.2"
+  - PACKAGE="maildir" OCAML_VERSION="4.05.0"
+  - PACKAGE="maildir" OCAML_VERSION="4.06.0"
+  - PACKAGE="maildir" OCAML_VERSION="4.07.0"
