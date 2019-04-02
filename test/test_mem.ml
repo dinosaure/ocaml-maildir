@@ -59,7 +59,7 @@ let add_one_from_ex_nihilo store =
       | news ->
           Alcotest.failf "Too much new messages (%d new messages): @[<hov>%a@]"
             (List.length news)
-            Fmt.(Dump.list Maildir.pp_message) news
+            Fmt.(Dump.list (using Maildir.value Maildir.pp_message)) news
 
 let list_of_len n =
   let rec go acc = function
@@ -94,11 +94,11 @@ let commit_new_message store =
       Store.commit fs maildir message ;
       let news = Store.fold only_new [] fs maildir in
       if List.length news <> 0
-      then Alcotest.failf "Commit fails, new messages: %a." (Fmt.Dump.list Maildir.pp_message) news
+      then Alcotest.failf "Commit fails, new messages: %a." Fmt.(Dump.list (using Maildir.value Maildir.pp_message)) news
       else ()
   | news -> Alcotest.failf "Too much news messages (%d new messages): @[<hov>%a@]"
               (List.length news)
-              Fmt.(Dump.list Maildir.pp_message) news
+              Fmt.(Dump.list (using Maildir.value Maildir.pp_message)) news
 
 let take n lst =
   let rec go acc lst n = match n, lst with

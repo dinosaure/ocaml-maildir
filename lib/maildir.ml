@@ -1,6 +1,7 @@
 (* The MIT License (MIT)
 
    Copyright (c) 2014-2017 Nicolas Ojeda Bar <n.oje.bar@gmail.com>
+   Copyright (c) 2018-2019 Romain Calascibetta <romain.calascibetta@gmail.com>
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -203,6 +204,22 @@ type message =
   ; host : string
   ; parameters : (string * string) list }
 
+type 'a with_raw =
+  { raw : string
+  ; value : 'a }
+
+let value { value; _ } = value
+let raw { raw; _ } = raw
+
+type t =
+  { pid : int
+  ; host : string
+  ; path : Fpath.t
+  ; random : unit -> int64
+  ; mutable mtime_new : int64
+  ; mutable mtime_cur : int64
+  ; mutable delivered : int }
+
 let equal_parameters a b =
   try List.for_all2 (fun (k0, v0) (k1, v1) -> String.equal k0 k1 && String.equal v0 v1)
         (List.sort (fun (a, _) (b, _) -> String.compare a b) a)
@@ -216,7 +233,7 @@ let equal_message a b =
   && String.equal a.host b.host
   && equal_parameters a.parameters b.parameters
 
-let is_new { info = Info flags; _ } = List.exists ((=) NEW) flags
+let is_new { value= { info = Info flags; _ }; _ } = List.exists ((=) NEW) flags
 
 let sanitize_host host =
   let len = String.length host in
@@ -242,19 +259,34 @@ let pp_message ppf t =
 
 type filename = string
 
-let to_filename = Fmt.to_to_string pp_message
+let unsafe_to_filename = Fmt.to_to_string pp_message
 
-let with_new message =
+let new_message ~time t =
+  let random = t.random () in
+  let message =
+    { time
+    ; uid= Modern { default_uniq with crypto_random= Some (random, Fmt.strf "%016Lx" random)
+                                    ; pid= Some (t.pid, string_of_int t.pid)
+                                    ; deliveries= Some (t.delivered, string_of_int t.pid)
+                                    ; order = [ V R; V P; V Q ] }
+    ; host= t.host
+    ; info= Info [ NEW ]
+    ; parameters= [] } in
+  t.delivered <- t.delivered + 1 ;
+  { raw= unsafe_to_filename message; value= message }
+
+let to_filename { raw; _ } = raw
+
+let with_new ({ value= message; _ } as t) =
   let Info flags = message.info in
   if List.exists (function NEW -> true | _ -> false) flags
-  then message
-  else { message with info = Info (NEW :: flags) }
+  then t else { t with value= { message with info = Info (NEW :: flags) } }
 
-let without_new ?(flags = []) message =
+let without_new ?(flags = []) ({ value= message; _ } as t) =
   let Info flags' = message.info in
   let flags = List.merge compare_flag flags flags' in
   let flags = List.filter (function NEW -> false | _ -> true) flags in
-  { message with info = Info flags }
+  { t with value= { message with info = Info flags } }
 
 module Parser = struct
   open Angstrom
@@ -396,20 +428,11 @@ module Parser = struct
 
   let of_filename input =
     match parse_string filename input with
-    | Ok v -> Ok v
+    | Ok v -> Ok { raw= input; value= v }
     | Error err -> Rresult.R.error_msgf "Invalid filename: %s (%s)" input err
 end
 
 let of_filename = Parser.of_filename
-
-type t =
-  { pid : int
-  ; host : string
-  ; path : Fpath.t
-  ; random : unit -> int64
-  ; mutable mtime_new : int64
-  ; mutable mtime_cur : int64
-  ; mutable delivered : int }
 
 let to_fpath t message =
   let result = to_filename message in
@@ -425,20 +448,6 @@ let create ~pid ~host ~random path =
   ; mtime_new = -1L
   ; mtime_cur = -1L
   ; delivered = 0 }
-
-let new_message ~time t =
-  let random = t.random () in
-  let message =
-    { time
-    ; uid= Modern { default_uniq with crypto_random= Some (random, Fmt.strf "%016Lx" random)
-                                    ; pid= Some (t.pid, string_of_int t.pid)
-                                    ; deliveries= Some (t.delivered, string_of_int t.pid)
-                                    ; order = [ V R; V P; V Q ] }
-    ; host= t.host
-    ; info= Info [ NEW ]
-    ; parameters= [] } in
-  t.delivered <- t.delivered + 1 ;
-  message
 
 module type IO = sig
   type +'a t
@@ -575,7 +584,7 @@ module Make
     let directory = if is_new uid then "new" else "cur" in
     FS.exists fs Fpath.(t.path / directory / message) >>= function
     | true ->
-        let Info flags = uid.info in
+        let Info flags = uid.value.info in
         return flags
     | false -> return []
 
@@ -585,12 +594,12 @@ module Make
     FS.exists fs Fpath.(t.path / directory / message) >>= function
     | false -> return ()
     | true ->
-        let Info flags = uid.info in
+        let Info flags = uid.value.info in
         let flags = canonicalize_flags flags in
         let flags' = canonicalize_flags flags' in
         if flags <> flags'
         then
-          let message' = to_filename { uid with info = Info flags' } in
+          let message' = to_filename { uid with value= { uid.value with info = Info flags' } } in
           FS.rename fs Fpath.(t.path / directory / message) Fpath.(t.path / directory / message')
         else return ()
 end

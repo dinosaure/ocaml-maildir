@@ -57,14 +57,9 @@ end
 module Maildir = Maildir.Make (IO) (FS)
 
 type fs = FS.t
+type never = |
 
 let fs : fs = ()
-
-[@@@warning "-37"]
-
-module Never
-  : sig type t = private Never end
-  = struct type t = Never end
 
 let transmit () a b =
   let input rd buf =
@@ -74,7 +69,7 @@ let transmit () a b =
       | None -> Buffer.contents buf in
     go ()
   in
-  let output wr (raw, chunk) =
+  let output wr (raw, chunk) : (int, never) result =
     let len = String.length raw in
     let rec go pos =
       if pos < len
@@ -93,6 +88,6 @@ let transmit () a b =
       Buffer.clear buf ;
       Fmt.epr "Transmit %d byte(s) from %a to %a.\n%!" write Fpath.pp a Fpath.pp b ;
       Ok ()
-  | Error Never.Never -> assert false
+  | Error _ -> .
 
 include Maildir

@@ -289,10 +289,11 @@ let pp = pp_scalar ~get:String.get ~length:String.length
 let () =
   add_test ~name:"maildir" [ gen_message ]
   @@ fun message ->
-  let str = Maildir.to_filename message in
+  let str = Maildir.unsafe_to_filename message in
 
   match Maildir.of_filename str with
   | Ok res ->
+      let res = Maildir.value res in
       check_eq ~pp:Fmt.(Dump.list (pair string string)) ~eq:Maildir.equal_parameters message.Maildir.parameters res.Maildir.parameters ;
       check_eq ~pp:Maildir.pp_info ~eq:Maildir.equal_info message.Maildir.info res.Maildir.info ;
       check_eq ~pp:Fmt.string ~eq:String.equal message.Maildir.host res.Maildir.host ;
