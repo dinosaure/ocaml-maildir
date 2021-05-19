@@ -1,7 +1,7 @@
 opam-version: "2.0"
 name: "maildir"
 version: "0.10.0"
-maintainer: "Nicolas Ojeda Bar <n.oje.bar@gmail.com>"
+maintainer: [ "Nicolas Ojeda Bar <n.oje.bar@gmail.com>" "Romain Calascibetta <romain.calascibetta@gmail.com>" ]
 authors: "Nicolas Ojeda Bar <n.oje.bar@gmail.com>"
 homepage: "https://github.com/nojb/ocaml-maildir"
 dev-repo: "git+https://github.com/nojb/ocaml-maildir.git"
@@ -18,10 +18,6 @@ build: [
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 
-pin-depends: [
-  [ "crowbar.dev" "git+https://github.com/stedolan/crowbar.git" ]
-]
-
 depends: [
   "ocaml" {>= "4.03.0"}
   "dune" {build}
@@ -32,5 +28,5 @@ depends: [
   "bos"
   "logs"
   "alcotest" {with-test}
-  "crowbar" {>= "dev" & with-test}
+  "crowbar" {>= "0.2" & with-test}
 ]

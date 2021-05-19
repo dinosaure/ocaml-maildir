@@ -427,7 +427,7 @@ module Parser = struct
     | Some chr -> failf "Invalid character: %02x" (Char.code chr)
 
   let of_filename input =
-    match parse_string filename input with
+    match parse_string ~consume:All filename input with
     | Ok v -> Ok { raw= input; value= v }
     | Error err -> Rresult.R.error_msgf "Invalid filename: %s (%s)" input err
 end
