@@ -33,7 +33,6 @@ module FS : Maildir.FS
         Fmt.invalid_arg "%s" err
 
   let rename () a b =
-    Fmt.epr "Move %a to %a.\n%!" Fpath.pp a Fpath.pp b ;
     match Bos.OS.Path.move ~force:true a b with
     | Ok v -> v
     | Error _ -> assert false (* should never occur. *)
