@@ -136,8 +136,8 @@ let commit_some n =
 let test_populate () = Alcotest.test_case "populate" `Quick (Rresult.R.failwith_error_msg <.> populate)
 let test_add_one () = Alcotest.test_case "add" `Quick (Rresult.R.failwith_error_msg <.> add_one_from_ex_nihilo)
 let test_commit () = Alcotest.test_case "commit" `Quick (Rresult.R.failwith_error_msg <.> commit_new_message)
-let test_add_some n = Alcotest.test_case (Fmt.strf "add some (%d)" n) `Quick (fun () -> add_some_from_ex_nihilo n)
-let test_commit_some n = Alcotest.test_case (Fmt.strf "commit some (%d)" n) `Quick (fun () -> commit_some n)
+let test_add_some n = Alcotest.test_case (Fmt.str "add some (%d)" n) `Quick (fun () -> add_some_from_ex_nihilo n)
+let test_commit_some n = Alcotest.test_case (Fmt.str "commit some (%d)" n) `Quick (fun () -> commit_some n)
 
 let () =
   Alcotest.run "maildir-unix"

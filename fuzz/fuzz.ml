@@ -12,9 +12,9 @@ module Option = struct
     | None -> true
 end
 
-let with_hex_int64_raw x = (x, Fmt.strf "%016Lx" x)
-let with_int64_raw x = (x, Fmt.strf "%Ld" x)
-let with_int_raw x = (x, Fmt.strf "%d" x)
+let with_hex_int64_raw x = (x, Fmt.str "%016Lx" x)
+let with_int64_raw x = (x, Fmt.str "%Ld" x)
+let with_int_raw x = (x, Fmt.str "%d" x)
 
 let ( >>= ) = dynamic_bind
 

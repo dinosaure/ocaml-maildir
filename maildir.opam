@@ -25,7 +25,7 @@ depends: [
   "rresult"
   "fmt"
   "fpath"
-  "bos"
+  "bos" {>= "0.2.1"}
   "logs"
   "alcotest" {with-test}
   "crowbar" {>= "0.2" & with-test}

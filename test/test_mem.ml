@@ -124,9 +124,9 @@ let commit_some store n =
 
 let test_populate () = Alcotest.test_case "populate" `Quick (fun () -> populate store)
 let test_add_one () = Alcotest.test_case "add" `Quick (fun () -> add_one_from_ex_nihilo store)
-let test_add_some n = Alcotest.test_case (Fmt.strf "add some (%d)" n) `Quick (fun () -> add_some_from_ex_nihilo store n)
+let test_add_some n = Alcotest.test_case (Fmt.str "add some (%d)" n) `Quick (fun () -> add_some_from_ex_nihilo store n)
 let test_commit () = Alcotest.test_case "commit" `Quick (fun () -> commit_new_message store)
-let test_commit_some n = Alcotest.test_case (Fmt.strf "commit some (%d)" n) `Quick (fun () -> commit_some store n)
+let test_commit_some n = Alcotest.test_case (Fmt.str "commit some (%d)" n) `Quick (fun () -> commit_some store n)
 
 let () =
   Alcotest.run "maildir-mem"

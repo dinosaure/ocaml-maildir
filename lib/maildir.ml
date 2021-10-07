@@ -195,7 +195,7 @@ let equal_info (Info a) (Info b) = equal_flags a b
 let pp_info ppf = function
   | Info [] | Info [ NEW ] -> ()
   | Info flags ->
-      Fmt.(prefix (const string ":2,") pp_flags) ppf flags
+      Fmt.((const string ":2,") ++ pp_flags) ppf flags
 
 type message =
   { time : int64
@@ -254,7 +254,7 @@ let pp_parameter ppf (k, v) =
 let pp_message ppf t =
     Fmt.pf ppf "%Ld.%a.%a%a%a"
       t.time pp_uid t.uid pp_host t.host
-      Fmt.(iter ~sep:Fmt.nop List.iter (prefix (const char ',') pp_parameter)) t.parameters
+      Fmt.(iter ~sep:Fmt.nop List.iter ((const char ',') ++ pp_parameter)) t.parameters
       pp_info t.info
 
 type filename = string
@@ -265,7 +265,7 @@ let new_message ~time t =
   let random = t.random () in
   let message =
     { time
-    ; uid= Modern { default_uniq with crypto_random= Some (random, Fmt.strf "%016Lx" random)
+    ; uid= Modern { default_uniq with crypto_random= Some (random, Fmt.str "%016Lx" random)
                                     ; pid= Some (t.pid, string_of_int t.pid)
                                     ; deliveries= Some (t.delivered, string_of_int t.pid)
                                     ; order = [ V R; V P; V Q ] }
@@ -402,7 +402,7 @@ module Parser = struct
       ; (char 'D' *> return DRAFT)
       ; (char 'F' *> return FLAGGED) ]
 
-  let failf fmt = Fmt.kstrf fail fmt
+  let failf fmt = Fmt.kstr fail fmt
 
   let filename =
     take_while1 is_digit >>| Int64.of_string >>= fun time ->
